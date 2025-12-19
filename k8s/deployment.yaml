@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiops-detector
+  namespace: aiops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aiops-detector
+  template:
+    metadata:
+      labels:
+        app: aiops-detector
+    spec:
+      containers:
+        - name: aiops-detector
+          image: anandprakashh/aiops-detector:v0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: ES_HOST
+              value: "https://elasticsearch-master.logging.svc.cluster.local:9200"
+            - name: ES_INDEX_PATTERN
+              value: "*"
+            - name: ES_LOOKBACK_MINUTES
+              value: "15"
+            - name: ANOMALY_CONTAMINATION
+              value: "0.1"
+            - name: ES_VERIFY_CERTS
+              value: "false"
+            - name: ES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: es-creds
+                  key: username
+            - name: ES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: es-creds
+                  key: password

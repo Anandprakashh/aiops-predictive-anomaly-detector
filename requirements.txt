@@ -1,5 +1,5 @@
 flask
-elasticsearch
+elasticsearch==7.17.9
 scikit-learn
 pandas
 numpy
