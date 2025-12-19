@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: aiops-detector-cron
+  namespace: aiops
+spec:
+  schedule: "*/5 * * * *"  # every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: curl
+              image: curlimages/curl:8.6.0
+              args:
+                - /bin/sh
+                - -c
+                - >
+                  echo "[$(date)] Calling AIOps predictor..." &&
+                  curl -sk http://aiops-detector.aiops.svc.cluster.local:5000/predict |
+                  tee /tmp/predict.json &&
+                  echo && echo "Done"
