@@ -1,0 +1,5 @@
+flask
+elasticsearch
+scikit-learn
+pandas
+numpy
