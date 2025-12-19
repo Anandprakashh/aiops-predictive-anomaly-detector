@@ -23,11 +23,11 @@ spec:
             - name: ES_HOST
               value: "https://elasticsearch-master.logging.svc.cluster.local:9200"
             - name: ES_INDEX_PATTERN
-              value: "*"
+              value: "chaos-logs"
             - name: ES_LOOKBACK_MINUTES
               value: "15"
             - name: ANOMALY_CONTAMINATION
-              value: "0.1"
+              value: "0.3"
             - name: ES_VERIFY_CERTS
               value: "false"
             - name: ES_USERNAME

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaos-app
+  namespace: aiops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chaos-app
+  template:
+    metadata:
+      labels:
+        app: chaos-app
+    spec:
+      containers:
+        - name: chaos-app
+          image: python:3.13-slim
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              pip install --no-cache-dir flask;
+              cat << 'EOF' > app.py
+              from flask import Flask
+              import random, logging, time
+
+              app = Flask(__name__)
+              logging.basicConfig(level=logging.INFO)
+
+              @app.route("/")
+              def index():
+                  # 30% of the time log an error and raise exception
+                  if random.random() < 0.3:
+                      app.logger.error("Chaos error occurred in request!")
+                      1/0
+                  app.logger.info("Chaos request OK")
+                  return "OK"
+
+              if __name__ == "__main__":
+                  # Small warmup logs
+                  for _ in range(10):
+                      app.logger.info("Chaos app starting up")
+                      time.sleep(1)
+                  app.run(host="0.0.0.0", port=8080)
+              EOF
+              python app.py
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chaos-app
+  namespace: aiops
+spec:
+  selector:
+    app: chaos-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP
+
